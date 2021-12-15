@@ -1,7 +1,3 @@
-import os
-import time
-import pygame
-import random
 
 pygame.mixer.pre_init(44100, -16, 1, 512)
 
