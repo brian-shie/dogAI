@@ -16,7 +16,6 @@ pygame.display.set_caption("Dog Game")
 
 bg = pygame.image.load('images/grassland11.png')
 
-
 walkLeft = [pygame.image.load('images/sprites/animals/animals_13.png'),
 			pygame.image.load('images/sprites/animals/animals_14.png'),
 			pygame.image.load('images/sprites/animals/animals_15.png'),
@@ -99,6 +98,75 @@ class Player:
 			self.walkCount += 1
 
 		pygame.draw.rect(win, (0, 0, 255), (10, 520, self.mana, 10))
+
+
+	def _move(self, action):
+		if keys[pygame.K_LEFT] and self.x >= self.vel:
+			self.x -= self.vel
+			self.left = True
+			self.right = False
+			self.up = False
+			self.down = False
+
+			if keys[pygame.K_LEFT] and self.x < self.vel:
+				self.x = 0
+				self.left = True
+				self.right = False
+				self.up = False
+				self.down = False
+
+		if keys[pygame.K_RIGHT] and self.x <= scrW - self.width - self.vel:
+			self.x += self.vel
+			self.right = True
+			self.left = False
+			self.up = False
+			self.down = False
+
+			if keys[pygame.K_RIGHT] and self.x > scrW - self.width - self.vel:
+				self.x = scrW - self.width
+				self.right = True
+				self.left = False
+				self.down = False
+				self.up = False
+		if keys[pygame.K_UP] and self.y >= self.vel:
+			self.y -= self.vel
+			self.up = True
+			self.down = False
+			self.left = False
+			self.right = False
+
+			if keys[pygame.K_UP] and self.y < self.vel:
+				self.y = 0
+				self.up = True
+				self.down = False
+				self.left = False
+				self.right = False
+
+		if keys[pygame.K_DOWN] and self.y <= scrH - self.height - self.vel:
+			self.y += self.vel
+			self.down = True
+			self.up = False
+			self.left = False
+			self.right = False
+
+			if keys[pygame.K_DOWN] and self.y > scrH - self.height - self.vel:
+				self.y = scrH - self.height
+				self.down = True
+				self.up = False
+				self.left = False
+				self.right = False
+
+		if keys[pygame.K_SPACE]:
+			if self.mana > 1:
+				self.mana -= 1
+				self.vel = 8
+			else:
+				self.vel = 5
+
+		if not keys[pygame.K_SPACE]:
+			self.vel = 5
+
+
 
 class Deathspirit:
 	def __init__(self, x, y, width, height, type):
@@ -224,6 +292,7 @@ dog = Player(200, 200, 64, 64)
 deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
 deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
 biscoito = Objects()
+gen = 0
 run = True
 
 while run:
@@ -235,71 +304,7 @@ while run:
 			run = False
 
 	keys = pygame.key.get_pressed()  # KEYS
-
-	if keys[pygame.K_LEFT] and dog.x >= dog.vel:
-		dog.x -= dog.vel
-		dog.left = True
-		dog.right = False
-		dog.up = False
-		dog.down = False
-
-		if keys[pygame.K_LEFT] and dog.x < dog.vel:
-			dog.x = 0
-			dog.left = True
-			dog.right = False
-			dog.up = False
-			dog.down = False
-
-	if keys[pygame.K_RIGHT] and dog.x <= scrW - dog.width - dog.vel:
-		dog.x += dog.vel
-		dog.right = True
-		dog.left = False
-		dog.up = False
-		dog.down = False
-
-		if keys[pygame.K_RIGHT] and dog.x > scrW - dog.width - dog.vel:
-			dog.x = scrW - dog.width
-			dog.right = True
-			dog.left = False
-			dog.down = False
-			dog.up = False
-	if keys[pygame.K_UP] and dog.y >= dog.vel:
-		dog.y -= dog.vel
-		dog.up = True
-		dog.down = False
-		dog.left = False
-		dog.right = False
-
-		if keys[pygame.K_UP] and dog.y < dog.vel:
-			dog.y = 0
-			dog.up = True
-			dog.down = False
-			dog.left = False
-			dog.right = False
-
-	if keys[pygame.K_DOWN] and dog.y <= scrH - dog.height - dog.vel:
-		dog.y += dog.vel
-		dog.down = True
-		dog.up = False
-		dog.left = False
-		dog.right = False
-
-		if keys[pygame.K_DOWN] and dog.y > scrH - dog.height - dog.vel:
-			dog.y = scrH - dog.height
-			dog.down = True
-			dog.up = False
-			dog.left = False
-			dog.right = False
-
-	if keys[pygame.K_SPACE]:
-		if dog.mana > 1:
-			dog.mana -= 1
-			dog.vel = 8
-		else:
-			dog.vel = 5
-
-	if not keys[pygame.K_SPACE]:
-		dog.vel = 5
+	dog._move(action = 1)
 
 	if biscoito.rng_x * 40 - 64 <= dog.x <= biscoito.rng_x * 40 + 48 and biscoito.rng_y * 40 - 64 <= dog.y <= biscoito.rng_y * 40 + 32:
 		biscoito.rng_x = random.randint(2, 18)
@@ -309,6 +314,7 @@ while run:
 		score += 1
 		deathspirit1.vel += 0.1
 		deathspirit2.vel += 0.1
+		reward = 10
 
 	deathspirit1.movement(1)
 	deathspirit2.movement(2)
@@ -321,6 +327,7 @@ while run:
 		score = 0
 		pygame.mixer.music.load('sound/nintendogs.mp3')
 		pygame.mixer.music.play(-1)
+		reward = -10
 
 	if deathspirit2.x - 40 <= dog.x <= deathspirit2.x + 40 and deathspirit2.y - 40 <= dog.y <= deathspirit2.y + 40:
 		dog = Player(200, 200, 64, 64)
@@ -330,6 +337,7 @@ while run:
 		score = 0
 		pygame.mixer.music.load('sound/nintendogs.mp3')
 		pygame.mixer.music.play(-1)
+		reward = -10
 
 	if keys[pygame.K_1]:
 		break
