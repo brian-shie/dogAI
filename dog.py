@@ -190,9 +190,8 @@ class Deathspirit:
 				self.up = False
 				self.left = True
 				self.right = False
-			#
 
-
+        
 class Objects:
 
 	def __init__(self):
@@ -263,6 +262,7 @@ while run:
 			dog.left = False
 			dog.down = False
 			dog.up = False
+
 	if keys[pygame.K_UP] and dog.y >= dog.vel:
 		dog.y -= dog.vel
 		dog.up = True
