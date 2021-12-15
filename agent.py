@@ -1,346 +1,93 @@
+import torch
+import random
+import numpy as np
+from collections import deque
+from scipy.stats import bernoulli
 
-pygame.mixer.pre_init(44100, -16, 1, 512)
+max_memory = 100_000
+batch_size = 1000
+learning_rate = 0.001
 
-pygame.init()
-
-scrW = 800
-scrH = 600
-
-win = pygame.display.set_mode((scrW, scrH))
-
-pygame.display.set_caption("Dog Game")
-
-bg = pygame.image.load('images/grassland11.png')
-
-walkLeft = [pygame.image.load('images/sprites/animals/animals_13.png'),
-			pygame.image.load('images/sprites/animals/animals_14.png'),
-			pygame.image.load('images/sprites/animals/animals_15.png'),
-			pygame.image.load('images/sprites/animals/animals_14.png')]
-walkRight = [pygame.image.load('images/sprites/animals/animals_25.png'),
-			 pygame.image.load('images/sprites/animals/animals_26.png'),
-			 pygame.image.load('images/sprites/animals/animals_27.png'),
-			 pygame.image.load('images/sprites/animals/animals_26.png')]
-walkUp = [pygame.image.load('images/sprites/animals/animals_37.png'),
-		  pygame.image.load('images/sprites/animals/animals_39.png'),
-		  pygame.image.load('images/sprites/animals/animals_37.png'),
-		  pygame.image.load('images/sprites/animals/animals_39.png')]
-walkDown = [pygame.image.load('images/sprites/animals/animals_01.png'),
-			pygame.image.load('images/sprites/animals/animals_03.png'),
-			pygame.image.load('images/sprites/animals/animals_01.png'),
-			pygame.image.load('images/sprites/animals/animals_03.png')]
-
-dogcookie = [pygame.image.load('images/dogc.png'), pygame.image.load('images/dogc2.png'),
-			 pygame.image.load('images/dogc3.png'), pygame.image.load('images/dogc4.png')]
-
-deathspiritLeft = [pygame.image.load('images/deathspirit/deathspirit_22.png'),
-			pygame.image.load('images/deathspirit/deathspirit_23.png'),
-			pygame.image.load('images/deathspirit/deathspirit_24.png'),
-			pygame.image.load('images/deathspirit/deathspirit_23.png')]
-deathspiritRight = [pygame.image.load('images/deathspirit/deathspirit_34.png'),
-			 pygame.image.load('images/deathspirit/deathspirit_35.png'),
-			 pygame.image.load('images/deathspirit/deathspirit_36.png'),
-			 pygame.image.load('images/deathspirit/deathspirit_35.png')]
-deathspiritUp = [pygame.image.load('images/deathspirit/deathspirit_46.png'),
-		  pygame.image.load('images/deathspirit/deathspirit_47.png'),
-		  pygame.image.load('images/deathspirit/deathspirit_48.png'),
-		  pygame.image.load('images/deathspirit/deathspirit_47.png')]
-deathspiritDown = [pygame.image.load('images/deathspirit/deathspirit_10.png'),
-			pygame.image.load('images/deathspirit/deathspirit_11.png'),
-			pygame.image.load('images/deathspirit/deathspirit_12.png'),
-			pygame.image.load('images/deathspirit/deathspirit_11.png')]
-
-clock = pygame.time.Clock()
-
-score = 0
-
-pygame.mixer.music.load('sound/nintendogs.mp3')
-pygame.mixer.music.play(-1)
-font = pygame.font.SysFont("comicsans", 40, True)
-sound_bis = pygame.mixer.Sound("sound/coin.wav")
-pygame.mixer.Sound.set_volume(sound_bis, 0.25)
-
-
-class Player:
-
-	def __init__(self, x, y, width, height):
-
-		self.x = x
-		self.y = y
-		self.width = int(width)
-		self.height = int(height)
-		self.vel = 5
-		self.left = False
-		self.right = False
-		self.up = False
-		self.down = False
-		self.walkCount = 0
-		self.mana = 150
-
-	def draw(self):
-		if self.walkCount == 15:
-			self.walkCount = 0
-
-		if self.left:
-			win.blit(walkLeft[self.walkCount // 4], (self.x, self.y))
-			self.walkCount += 1
-		elif self.right:
-			win.blit(walkRight[self.walkCount // 4], (self.x, self.y))
-			self.walkCount += 1
-		elif self.up:
-			win.blit(walkUp[self.walkCount // 8], (self.x, self.y))
-			self.walkCount += 1
-		else:
-			win.blit(walkDown[self.walkCount // 8], (self.x, self.y))
-			self.walkCount += 1
-
-		pygame.draw.rect(win, (0, 0, 255), (10, 520, self.mana, 10))
-
-
-	def _move(self, action):
-		if keys[pygame.K_LEFT] and self.x >= self.vel:
-			self.x -= self.vel
-			self.left = True
-			self.right = False
-			self.up = False
-			self.down = False
-
-			if keys[pygame.K_LEFT] and self.x < self.vel:
-				self.x = 0
-				self.left = True
-				self.right = False
-				self.up = False
-				self.down = False
-
-		if keys[pygame.K_RIGHT] and self.x <= scrW - self.width - self.vel:
-			self.x += self.vel
-			self.right = True
-			self.left = False
-			self.up = False
-			self.down = False
-
-			if keys[pygame.K_RIGHT] and self.x > scrW - self.width - self.vel:
-				self.x = scrW - self.width
-				self.right = True
-				self.left = False
-				self.down = False
-				self.up = False
-		if keys[pygame.K_UP] and self.y >= self.vel:
-			self.y -= self.vel
-			self.up = True
-			self.down = False
-			self.left = False
-			self.right = False
-
-			if keys[pygame.K_UP] and self.y < self.vel:
-				self.y = 0
-				self.up = True
-				self.down = False
-				self.left = False
-				self.right = False
-
-		if keys[pygame.K_DOWN] and self.y <= scrH - self.height - self.vel:
-			self.y += self.vel
-			self.down = True
-			self.up = False
-			self.left = False
-			self.right = False
-
-			if keys[pygame.K_DOWN] and self.y > scrH - self.height - self.vel:
-				self.y = scrH - self.height
-				self.down = True
-				self.up = False
-				self.left = False
-				self.right = False
-
-		if keys[pygame.K_SPACE]:
-			if self.mana > 1:
-				self.mana -= 1
-				self.vel = 8
-			else:
-				self.vel = 5
-
-		if not keys[pygame.K_SPACE]:
-			self.vel = 5
-
-
-
-class Deathspirit:
-	def __init__(self, x, y, width, height, type):
-		self.x = x
-		self.y = y
-		self.width = int(width)
-		self.height = int(height)
-		self.type = type
-		self.vel = 3
-		self.left = False
-		self.right = False
-		self.up = False
-		self.down = False
-		self.walkCount = 0
-		self.mana = 150
-
-	def draw(self):
-		if self.walkCount == 15:
-			self.walkCount = 0
-
-		if self.left:
-			win.blit(deathspiritLeft[self.walkCount // 4], (self.x, self.y))
-			self.walkCount += 1
-		elif self.right:
-			win.blit(deathspiritRight[self.walkCount // 4], (self.x, self.y))
-			self.walkCount += 1
-		elif self.up:
-			win.blit(deathspiritUp[self.walkCount // 8], (self.x, self.y))
-			self.walkCount += 1
-		else:
-			win.blit(deathspiritDown[self.walkCount // 8], (self.x, self.y))
-			self.walkCount += 1
-
-	def movement(self, type):
-		if self.type == 1:
-			if self.x + 5 < dog.x:
-				self.x += self.vel
-				self.down = False
-				self.up = False
-				self.left = False
-				self.right = True
-
-			elif self.x - 5 > dog.x:
-				self.x -= self.vel
-				self.down = False
-				self.up = False
-				self.left = True
-				self.right = False
-			#
-			elif self.y < dog.y:
-				self.y += self.vel
-				self.down = True
-				self.up = False
-				self.left = False
-				self.right = False
-
-			elif self.y > dog.y:
-				self.y -= self.vel
-				self.down = False
-				self.up = True
-				self.left = False
-				self.right = False
-
-		else:
-			if self.y + 5 < dog.y:
-				self.y += self.vel
-				self.down = True
-				self.up = False
-				self.left = False
-				self.right = False
-
-			elif self.y - 5 > dog.y:
-				self.y -= self.vel
-				self.down = False
-				self.up = True
-				self.left = False
-				self.right = False
-
-			elif self.x < dog.x:
-				self.x += self.vel
-				self.down = False
-				self.up = False
-				self.left = False
-				self.right = True
-
-			elif self.x > dog.x:
-				self.x -= self.vel
-				self.down = False
-				self.up = False
-				self.left = True
-				self.right = False
-			#
-
-
-class Objects:
+class Agent:
 
 	def __init__(self):
-		self.rng_x = random.randint(2, 18)
-		self.rng_y = random.randint(2, 13)
-		self.walkCount = 0
+		self.n_games = 0
+		self.epsilon = 0 # aleatoriedade
+		self.gamma = 0 # taxa de desconto
+		self.memory = deque(maxlen = MAX_MEMORY) # se alcança o limite: popleft()
+		self.model = None
+		self.trainer = None
 
-	def draw(self):
-		if self.walkCount == 19:
-			self.walkCount = 0
-		win.blit(dogcookie[self.walkCount // 5], (self.rng_x * 40, self.rng_y * 40))
-		self.walkCount += 1
+	def get_state(self, game):
+		state = [
+			dog.x, dog.y, dog.mana, score, # Player
+			biscoito.rng_x, biscoito.rng_y, # Biscoito
+			deathspirit1.x, deathspirit1.y, deathspirit2.x, deathspirit2.y # Mobs
+		]
+		return np.array(state)
+
+	def remember(self, state, action, reward, next_state, game_over):
+		self.memory.append((state, action, reward, next_state, game_over))
+
+	def train_long_memory(self):
+		if len(self.memory) > batch_size:
+			mini_sample = random.sample(self.memory, batch_size) # list of tuples
+
+		else:
+			mini_sample = self.memory
+
+		state, action, reward, next_state, game_over = zip(*mini_sample)
+		self.trainer.train_step(state, action, reward, next_state, game_over)
+
+	def train_short_memory(self, state, action, reward, next_state, game_over):
+		self.trainer.train_step(state, action, reward, next_state, game_over)
+
+	def get_action(self, state):
+		# random moves: tradeoff exploration / exploitation
+		self.epsilon = 620 - 100*np.log(self.n_games)
+		final_move = [0, 0, 0, 0, 0, 0]
+		if random.randint(0, 1000) , self.epsilon:
+			final_move = bernoulli.rvs(size = 5, p = 0.5)
+
+		else:
+			state0 = torch.tensor(state, dtype = torch.float)
+			final_move = self.model.predict_proba(state0)
 
 
-def redraw():
-	win.blit(bg, (0, 0))
+def train():
+	plot_scores = []
+	plot_mean_scores = []
+	total_score = 0
+	best_score = 0
+	agent = Agent()
+	game = DogGameAI()
+	while True:
+		# get old state
+		state_old = agent.get_state(game)
 
-	text = font.render("Score: " + str(score), 1, (255, 255, 255))
-	win.blit(text, (15, 530))
-	dog.draw()
-	biscoito.draw()
-	deathspirit1.draw()
-	deathspirit2.draw()
-	pygame.display.update()
+		# get move
+		final_move = agent.get_action(state_old)
 
+		# perform move and get new state
+		reward, done, score = game.play_step(final_move)
+		state_new = agent.get_state(game)
 
-# main
-dog = Player(200, 200, 64, 64)
-deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
-deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
-biscoito = Objects()
-gen = 0
-run = True
+		# train short memory
+		agent.train_short_memory(state_old, final_move, reward, state_new, game_over)
 
-while run:
+		if game_over:
+			# train long memory / replay memory / experience replay
+			game.reset()
+			agent.n_games += 1
+			agent.train_long_memory()
 
-	clock.tick(30)
+			if score > record:
+				record = score
+				# agent.model.save()
 
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			run = False
+			print(f"Game:{agent.n_games} Score {score} Best Score {best_score} ")
 
-	keys = pygame.key.get_pressed()  # KEYS
-	dog._move(action = 1)
+			# plot
 
-	if biscoito.rng_x * 40 - 64 <= dog.x <= biscoito.rng_x * 40 + 48 and biscoito.rng_y * 40 - 64 <= dog.y <= biscoito.rng_y * 40 + 32:
-		biscoito.rng_x = random.randint(2, 18)
-		biscoito.rng_y = random.randint(2, 13)
-		dog.mana += 10
-		sound_bis.play()
-		score += 1
-		deathspirit1.vel += 0.1
-		deathspirit2.vel += 0.1
-		reward = 10
-
-	deathspirit1.movement(1)
-	deathspirit2.movement(2)
-
-	if deathspirit1.x - 40 <= dog.x <= deathspirit1.x + 40 and deathspirit1.y - 40 <= dog.y <= deathspirit1.y + 40:
-		dog = Player(200, 200, 64, 64)
-		deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
-		deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
-		biscoito = Objects()
-		score = 0
-		pygame.mixer.music.load('sound/nintendogs.mp3')
-		pygame.mixer.music.play(-1)
-		reward = -10
-
-	if deathspirit2.x - 40 <= dog.x <= deathspirit2.x + 40 and deathspirit2.y - 40 <= dog.y <= deathspirit2.y + 40:
-		dog = Player(200, 200, 64, 64)
-		deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
-		deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
-		biscoito = Objects()
-		score = 0
-		pygame.mixer.music.load('sound/nintendogs.mp3')
-		pygame.mixer.music.play(-1)
-		reward = -10
-
-	if keys[pygame.K_1]:
-		break
-
-	if dog.mana < 150:
-		dog.mana += 1/10
-
-	redraw()
-
-pygame.quit()
+if __name__ == '__main__':
+	train()
