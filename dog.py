@@ -206,71 +206,56 @@ class DogGame():
 		self._move(self.inputs)
 
 	def _move(self, inputs):
-		if input[0] and dog.x >= dog.vel:
-			dog.x -= dog.vel
-			dog.left = True
-			dog.right, dog.up, dog.down = False
 
-			if keys[pygame.K_LEFT] and dog.x < dog.vel:
-				dog.x = 0
-				dog.left = True
-				dog.right, dog.up, dog.down = False
+		if self.inputs[4]:
+			if self.dog.mana > 1:
+				self.dog.mana -= 1
+				self.dog.vel = 8
 
-		if keys[pygame.K_RIGHT] and dog.x <= scrW - dog.width - dog.vel:
-			dog.x += dog.vel
-			dog.right = True
-			dog.left = False
-			dog.up = False
-			dog.down = False
-
-			if keys[pygame.K_RIGHT] and dog.x > scrW - dog.width - dog.vel:
-				dog.x = scrW - dog.width
-				dog.right = True
-				dog.left = False
-				dog.down = False
-				dog.up = False
-
-		if keys[pygame.K_UP] and dog.y >= dog.vel:
-			dog.y -= dog.vel
-			dog.up = True
-			dog.down = False
-			dog.left = False
-			dog.right = False
-
-			if keys[pygame.K_UP] and dog.y < dog.vel:
-				dog.y = 0
-				dog.up = True
-				dog.down = False
-				dog.left = False
-				dog.right = False
-
-		if keys[pygame.K_DOWN] and dog.y <= scrH - dog.height - dog.vel:
-			dog.y += dog.vel
-			dog.down = True
-			dog.up = False
-			dog.left = False
-			dog.right = False
-
-			if keys[pygame.K_DOWN] and dog.y > scrH - dog.height - dog.vel:
-				dog.y = scrH - dog.height
-				dog.down = True
-				dog.up = False
-				dog.left = False
-				dog.right = False
-
-		if keys[pygame.K_SPACE]:
-			if dog.mana > 1:
-				dog.mana -= 1
-				dog.vel = 8
 			else:
-				dog.vel = 5
+				self.dog.vel = 5
 
-		if not keys[pygame.K_SPACE]:
-			dog.vel = 5
+		if self.inputs[0] and self.dog.x >= self.dog.vel:
+			self.dog.x -= dog.vel
+			self.dog.left = True
+			self.dog.right, self.dog.up, self.dog.down = False
 
+			if self.inputs[0] and self.dog.x < self.dog.vel:
+				self.dog.x = 0
+				self.dog.left = True
+				self.dog.right, self.dog.up, self.dog.down = False
 
+		if self.inputs[1] and self.dog.x <= scrW - self.dog.width - self.dog.vel:
+			self.dog.x += self.dog.vel
+			self.dog.right = True
+			self.dog.left, self.dog.up, self.dog.down = False
 
+			if self.inputs[1] and self.dog.x > scrW - self.dog.width - self.dog.vel:
+				self.dog.x = scrW - self.dog.width
+				self.dog.right = True
+				self.dog.left, self.dog.up, self.dog.down = False
 
+		if self.inputs[2] and self.dog.y >= self.dog.vel:
+			self.dog.y -= self.dog.vel
+			self.dog.up = True
+			self.dog.down, self.dog.left, self.dog.right = False
+
+			if self.inputs[2] and self.dog.y < self.dog.vel:
+				self.dog.y = 0
+				self.dog.up = True
+				self.dog.down, self.dog.left, self.dog.right = False
+
+		if self.inputs[3] and self.dog.y <= scrH - self.dog.height - self.dog.vel:
+			self.dog.y += self.dog.vel
+			self.dog.down = True
+			self.dog.up, self.dog.left, self.dog.right = False
+
+			if self.inputs[3] and self.dog.y > scrH - self.dog.height - self.dog.vel:
+				self.dog.y = scrH - self.dog.height
+				self.dog.down = True
+				self.dog.up, self.dog.left, self.dog.right = False
+
+		self.inputs = [0, 0, 0, 0, 0]
 
 if __name__ == '__main__':
 	game = DogGame()
