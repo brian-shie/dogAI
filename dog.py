@@ -2,82 +2,17 @@ import os
 import time
 import pygame
 import random
-
-pygame.mixer.pre_init(44100, -16, 1, 512)
-
-pygame.init()
-
-scrW = 800
-scrH = 600
-
-win = pygame.display.set_mode((scrW, scrH))
-
-pygame.display.set_caption("Dog Game")
-
-bg = pygame.image.load('images/grassland11.png')
-
-
-walkLeft = [pygame.image.load('images/sprites/animals/animals_13.png'),
-			pygame.image.load('images/sprites/animals/animals_14.png'),
-			pygame.image.load('images/sprites/animals/animals_15.png'),
-			pygame.image.load('images/sprites/animals/animals_14.png')]
-walkRight = [pygame.image.load('images/sprites/animals/animals_25.png'),
-			 pygame.image.load('images/sprites/animals/animals_26.png'),
-			 pygame.image.load('images/sprites/animals/animals_27.png'),
-			 pygame.image.load('images/sprites/animals/animals_26.png')]
-walkUp = [pygame.image.load('images/sprites/animals/animals_37.png'),
-		  pygame.image.load('images/sprites/animals/animals_39.png'),
-		  pygame.image.load('images/sprites/animals/animals_37.png'),
-		  pygame.image.load('images/sprites/animals/animals_39.png')]
-walkDown = [pygame.image.load('images/sprites/animals/animals_01.png'),
-			pygame.image.load('images/sprites/animals/animals_03.png'),
-			pygame.image.load('images/sprites/animals/animals_01.png'),
-			pygame.image.load('images/sprites/animals/animals_03.png')]
-
-dogcookie = [pygame.image.load('images/dogc.png'), pygame.image.load('images/dogc2.png'),
-			 pygame.image.load('images/dogc3.png'), pygame.image.load('images/dogc4.png')]
-
-deathspiritLeft = [pygame.image.load('images/deathspirit/deathspirit_22.png'),
-			pygame.image.load('images/deathspirit/deathspirit_23.png'),
-			pygame.image.load('images/deathspirit/deathspirit_24.png'),
-			pygame.image.load('images/deathspirit/deathspirit_23.png')]
-deathspiritRight = [pygame.image.load('images/deathspirit/deathspirit_34.png'),
-			 pygame.image.load('images/deathspirit/deathspirit_35.png'),
-			 pygame.image.load('images/deathspirit/deathspirit_36.png'),
-			 pygame.image.load('images/deathspirit/deathspirit_35.png')]
-deathspiritUp = [pygame.image.load('images/deathspirit/deathspirit_46.png'),
-		  pygame.image.load('images/deathspirit/deathspirit_47.png'),
-		  pygame.image.load('images/deathspirit/deathspirit_48.png'),
-		  pygame.image.load('images/deathspirit/deathspirit_47.png')]
-deathspiritDown = [pygame.image.load('images/deathspirit/deathspirit_10.png'),
-			pygame.image.load('images/deathspirit/deathspirit_11.png'),
-			pygame.image.load('images/deathspirit/deathspirit_12.png'),
-			pygame.image.load('images/deathspirit/deathspirit_11.png')]
-
-clock = pygame.time.Clock()
-
-score = 0
-
-pygame.mixer.music.load('sound/nintendogs.mp3')
-pygame.mixer.music.play(-1)
-font = pygame.font.SysFont("comicsans", 40, True)
-sound_bis = pygame.mixer.Sound("sound/coin.wav")
-pygame.mixer.Sound.set_volume(sound_bis, 0.25)
-
+from helper import *
 
 class Player:
 
 	def __init__(self, x, y, width, height):
-
 		self.x = x
 		self.y = y
 		self.width = int(width)
 		self.height = int(height)
 		self.vel = 5
-		self.left = False
-		self.right = False
-		self.up = False
-		self.down = False
+		self.left, self.right, self.up, self.down = False
 		self.walkCount = 0
 		self.mana = 150
 
@@ -86,32 +21,29 @@ class Player:
 			self.walkCount = 0
 
 		if self.left:
-			win.blit(walkLeft[self.walkCount // 4], (self.x, self.y))
+			win.blit(player_left[self.walkCount // 4], (self.x, self.y))
 			self.walkCount += 1
+
 		elif self.right:
-			win.blit(walkRight[self.walkCount // 4], (self.x, self.y))
+			win.blit(player_right[self.walkCount // 4], (self.x, self.y))
 			self.walkCount += 1
+
 		elif self.up:
-			win.blit(walkUp[self.walkCount // 8], (self.x, self.y))
+			win.blit(player_up[self.walkCount // 8], (self.x, self.y))
 			self.walkCount += 1
+
 		else:
-			win.blit(walkDown[self.walkCount // 8], (self.x, self.y))
+			win.blit(player_down[self.walkCount // 8], (self.x, self.y))
 			self.walkCount += 1
 
-		pygame.draw.rect(win, (0, 0, 255), (10, 520, self.mana, 10))
 
-class Deathspirit:
+class Monster:
 	def __init__(self, x, y, width, height, type):
-		self.x = x
-		self.y = y
-		self.width = int(width)
-		self.height = int(height)
+		self.x, self.y = x, y
+		self.width, self.height = int(width), int(height)
 		self.type = type
 		self.vel = 3
-		self.left = False
-		self.right = False
-		self.up = False
-		self.down = False
+		self.left, self.right, self.up, self.down = False
 		self.walkCount = 0
 		self.mana = 150
 
@@ -122,12 +54,15 @@ class Deathspirit:
 		if self.left:
 			win.blit(deathspiritLeft[self.walkCount // 4], (self.x, self.y))
 			self.walkCount += 1
+
 		elif self.right:
 			win.blit(deathspiritRight[self.walkCount // 4], (self.x, self.y))
 			self.walkCount += 1
+
 		elif self.up:
 			win.blit(deathspiritUp[self.walkCount // 8], (self.x, self.y))
 			self.walkCount += 1
+
 		else:
 			win.blit(deathspiritDown[self.walkCount // 8], (self.x, self.y))
 			self.walkCount += 1
@@ -191,35 +126,57 @@ class Deathspirit:
 				self.left = True
 				self.right = False
 
-        
-class Objects:
+
+class Cookie:
 
 	def __init__(self):
-		self.rng_x = random.randint(2, 18)
-		self.rng_y = random.randint(2, 13)
+		self.x, self.y  = random.randint(2, 18), random.randint(2, 13)
 		self.walkCount = 0
 
 	def draw(self):
 		if self.walkCount == 19:
 			self.walkCount = 0
+
 		win.blit(dogcookie[self.walkCount // 5], (self.rng_x * 40, self.rng_y * 40))
 		self.walkCount += 1
 
 
-def redraw():
-	win.blit(bg, (0, 0))
-
-	text = font.render("Score: " + str(score), 1, (255, 255, 255))
-	win.blit(text, (15, 530))
-	dog.draw()
-	biscoito.draw()
-	deathspirit1.draw()
-	deathspirit2.draw()
-	pygame.display.update()
 
 
-# main
-dog = Player(200, 200, 64, 64)
+class DogGame():
+
+	def __init__(self):
+		self.player = Player(200, 200, 64, 64)
+		self.
+		pygame.mixer.pre_init(44100, -16, 1, 512)
+
+		pygame.init()
+
+		scrH, scrW = 600, 800
+		win = pygame.display.set_mode((scrW, scrH))
+		pygame.display.set_caption("Dog Game")
+
+		self.clock = pygame.time.Clock()
+
+		pygame.mixer.music.load('sound/nintendogs.mp3')
+		pygame.mixer.music.play(-1)
+
+		pygame.mixer.Sound.set_volume(sound_bis, 0.25)
+
+	def redraw():
+		win.blit(bg, (0, 0))
+
+		pygame.draw.rect(win, (0, 0, 255), (10, 520, self.mana, 10))
+		text = font.render("Score: " + str(score), 1, (255, 255, 255))
+		win.blit(text, (15, 530))
+
+		dog.draw()
+		biscoito.draw()
+		deathspirit1.draw()
+		deathspirit2.draw()
+		pygame.display.update()
+
+
 deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
 deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
 biscoito = Objects()
