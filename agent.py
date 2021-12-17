@@ -5,6 +5,7 @@ from collections import deque
 from scipy.stats import bernoulli
 from model import Linear_QNet, QTrainer
 from dogAI import DogGameAI
+from helper import plot
 
 max_memory = 100_000
 batch_size = 1000
@@ -26,7 +27,8 @@ class Agent:
 			game.biscoito.x, game.biscoito.y, # Biscoito
 			game.monster_1.x, game.monster_1.y, game.monster_2.x, game.monster_2.y # Mobs
 		]
-		return np.array(state)
+
+		return state
 
 	def remember(self, state, action, reward, next_state, game_over):
 		self.memory.append((state, action, reward, next_state, game_over))
@@ -50,11 +52,13 @@ class Agent:
 		self.epsilon = 150 - self.n_games
 		final_move = [0, 0, 0, 0, 0, 0]
 		if random.randint(0, 250) < self.epsilon:
-			final_move = bernoulli.rvs(size = 5, p = 0.5)
+			final_move = torch.tensor(bernoulli.rvs(size = 5, p = 0.5), dtype = int)
 
 		else:
-			state0 =  torch.tensor(np.array(state), dtype=torch.float)
-			final_move = self.model(state0)
+			state0 =  torch.tensor(state, dtype=torch.float)
+			final_move = self.model(state0) > 0.5
+
+		# print(type(final_move))
 
 		return final_move
 
@@ -90,11 +94,15 @@ def train():
 
 			if score > best_score:
 				best_score = score
-				# agent.model.save()
+				agent.model.save()
 
 			print(f"Game:{agent.n_games} Score {score} Best Score {best_score} ")
 
-			# plot
+			plot_scores.append(score)
+			total_score += score
+			mean_score = total_score / agent.n_games
+			plot_mean_scores.append(mean_score)
+			plot(plot_scores, plot_mean_scores)
 
 if __name__ == '__main__':
 	train()

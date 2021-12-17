@@ -107,7 +107,7 @@ class DogGameAI():
 			self.score += 1
 			self.monster_1.vel += 0.1
 			self.monster_2.vel += 0.1
-			reward = 10
+			reward = 100
 
 		# 5. Redraw
 		self._redraw()
