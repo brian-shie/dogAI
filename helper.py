@@ -1,3 +1,4 @@
+import pygame
 import matplotlib.pyplot as plt
 from IPython import display
 
@@ -61,8 +62,7 @@ bg = pygame.image.load('images/grassland11.png')
 dogcookie = [pygame.image.load('images/dogc.png'), pygame.image.load('images/dogc2.png'),
 			 pygame.image.load('images/dogc3.png'), pygame.image.load('images/dogc4.png')]
 
-font = pygame.font.SysFont("comicsans", 40, True)
-sound_bis = pygame.mixer.Sound("sound/coin.wav")
+
 scrH, scrW = 600, 800
 
 #---------------------------------------------------------------------------
