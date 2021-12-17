@@ -9,7 +9,7 @@ from helper import plot
 
 max_memory = 100_000
 batch_size = 1000
-learning_rate = 0.001
+learning_rate = 0.005
 
 class Agent:
 
@@ -51,12 +51,13 @@ class Agent:
 		# self.epsilon = 620 - 100*np.log(self.n_games)
 		self.epsilon = 150 - self.n_games
 		final_move = [0, 0, 0, 0, 0, 0]
-		if random.randint(0, 250) < self.epsilon:
+		if random.randint(0, 200) < self.epsilon:
 			final_move = torch.tensor(bernoulli.rvs(size = 5, p = 0.5), dtype = int)
 
 		else:
 			state0 =  torch.tensor(state, dtype=torch.float)
-			final_move = self.model(state0) > 0.5
+			final_move = self.model(state0)
+			print(final_move)
 
 		# print(type(final_move))
 

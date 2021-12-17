@@ -87,15 +87,15 @@ class DogGameAI():
 		self._move_monsters()
 
 		# 3. Check if game ends
-		reward = 0
+		reward = -0.1
 		if self.monster_1.x - 40 <= self.player.x <= self.monster_1.x + 40 and self.monster_1.y - 40 <= self.player.y <= self.monster_1.y + 40:
 			self.game_over = True
-			reward = -50
+			reward = -100
 			return reward, self.game_over, self.score
 
 		if self.monster_2.x - 40 <= self.player.x <= self.monster_2.x + 40 and self.monster_2.y - 40 <= self.player.y <= self.monster_2.y + 40:
 			self.game_over = True
-			reward = -50
+			reward = -100
 			return reward, self.game_over, self.score
 
 		# 4. Check cookie colision
@@ -107,7 +107,7 @@ class DogGameAI():
 			self.score += 1
 			self.monster_1.vel += 0.1
 			self.monster_2.vel += 0.1
-			reward = 100
+			reward = 1000
 
 		# 5. Redraw
 		self._redraw()
