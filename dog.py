@@ -147,8 +147,9 @@ class DogGame():
 		self.player = Player(200, 200, 64, 64)
 		self.monster_1 = Deathspirit(0, 0, 64, 64, 1)
 		self.monster_2 = Deathspirit(736, 536, 64, 64, 0)
-		self.biscoito = Objects()
+		self.biscoito = Cookie()
 		self.inputs = [0, 0, 0, 0, 0] # Left, Right, Up, Down, Spacebar
+		self.score = 0
 
 		pygame.mixer.pre_init(44100, -16, 1, 512)
 		pygame.init()
@@ -164,19 +165,6 @@ class DogGame():
 		pygame.mixer.Sound.set_volume(sound_bis, 0.25)
 
 		self.game_over = False
-
-	def redraw(self):
-		self.win.blit(bg, (0, 0))
-
-		pygame.draw.rect(win, (0, 0, 255), (10, 520, self.mana, 10))
-		self.text = font.render("Score: " + str(score), 1, (255, 255, 255))
-		self.win.blit(self.text, (15, 530))
-
-		self.player.draw()
-		self.biscoito.draw()
-		self.monster_1.draw()
-		self.monster_2.draw()
-		pygame.display.update()
 
 	def play_step(self):
 
@@ -204,6 +192,32 @@ class DogGame():
 
 		# 2. Movement
 		self._move(self.inputs)
+
+		# 3. Check if game ends
+		if self.monster_1.x - 40 <= self.dog.x <= self.monster_1.x + 40 and self.monster_1.y - 40 <= self.dog.y <= self.monster_1.y + 40:
+			self.game_over = True
+			return self.game_over, self.score
+
+		if self.monster_2.x - 40 <= self.dog.x <= self.monster_2.x + 40 and self.monster_2.y - 40 <= self.dog.y <= self.monster_2.y + 40:
+			self.game_over = True
+			return self.game_over, self.score
+
+		# 4. Check cookie colision
+		if self.biscoito.x * 40 - 64 <= dog.x <= biscoito.x * 40 + 48 and self.biscoito.y * 40 - 64 <= dog.y <= biscoito.y * 40 + 32:
+			self.biscoito.x = random.randint(2, 18)
+			self.biscoito.y = random.randint(2, 13)
+			self.dog.mana += 10
+			sound_bis.play()
+			self.score += 1
+			self.monster_1.vel += 0.1
+			self.monster_2.vel += 0.1
+
+		# 5. Redraw
+		self._redraw()
+
+		# 6. Reset inputs, return game over and score
+		self.inputs = [0, 0, 0, 0, 0]
+		return self.game_over, self.score
 
 	def _move(self, inputs):
 
@@ -255,49 +269,28 @@ class DogGame():
 				self.dog.down = True
 				self.dog.up, self.dog.left, self.dog.right = False
 
-		self.inputs = [0, 0, 0, 0, 0]
+	def _redraw(self):
+		self.win.blit(bg, (0, 0))
+
+		pygame.draw.rect(win, (0, 0, 255), (10, 520, self.mana, 10))
+		self.text = font.render("Score: " + str(score), 1, (255, 255, 255))
+		self.win.blit(self.text, (15, 530))
+
+		self.player.draw()
+		self.biscoito.draw()
+		self.monster_1.draw()
+		self.monster_2.draw()
+		pygame.display.update()
+
 
 if __name__ == '__main__':
 	game = DogGame()
 
 	while True:
+		game.game_over, score = game.play_step()
 
-		if biscoito.rng_x * 40 - 64 <= dog.x <= biscoito.rng_x * 40 + 48 and biscoito.rng_y * 40 - 64 <= dog.y <= biscoito.rng_y * 40 + 32:
-			biscoito.rng_x = random.randint(2, 18)
-			biscoito.rng_y = random.randint(2, 13)
-			dog.mana += 10
-			sound_bis.play()
-			score += 1
-			deathspirit1.vel += 0.1
-			deathspirit2.vel += 0.1
-
-		deathspirit1.movement(1)
-		deathspirit2.movement(2)
-
-		if deathspirit1.x - 40 <= dog.x <= deathspirit1.x + 40 and deathspirit1.y - 40 <= dog.y <= deathspirit1.y + 40:
-			dog = Player(200, 200, 64, 64)
-			deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
-			deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
-			biscoito = Objects()
-			score = 0
-			pygame.mixer.music.load('sound/nintendogs.mp3')
-			pygame.mixer.music.play(-1)
-
-		if deathspirit2.x - 40 <= dog.x <= deathspirit2.x + 40 and deathspirit2.y - 40 <= dog.y <= deathspirit2.y + 40:
-			dog = Player(200, 200, 64, 64)
-			deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
-			deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
-			biscoito = Objects()
-			score = 0
-			pygame.mixer.music.load('sound/nintendogs.mp3')
-			pygame.mixer.music.play(-1)
-
-		if keys[pygame.K_1]:
+		if game.game_over == True:
 			break
 
-		if dog.mana < 150:
-			dog.mana += 1/10
-
-		redraw()
-
+	print('Final Score', score)
 	pygame.quit()
