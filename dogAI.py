@@ -3,350 +3,301 @@ import time
 import pygame
 import random
 import numpy as np
-
-pygame.mixer.pre_init(44100, -16, 1, 512)
-
-pygame.init()
-
-scrW = 800
-scrH = 600
-
-win = pygame.display.set_mode((scrW, scrH))
-
-pygame.display.set_caption("Dog Game")
-
-bg = pygame.image.load('images/grassland11.png')
-
-walkLeft = [pygame.image.load('images/sprites/animals/animals_13.png'),
-			pygame.image.load('images/sprites/animals/animals_14.png'),
-			pygame.image.load('images/sprites/animals/animals_15.png'),
-			pygame.image.load('images/sprites/animals/animals_14.png')]
-walkRight = [pygame.image.load('images/sprites/animals/animals_25.png'),
-			 pygame.image.load('images/sprites/animals/animals_26.png'),
-			 pygame.image.load('images/sprites/animals/animals_27.png'),
-			 pygame.image.load('images/sprites/animals/animals_26.png')]
-walkUp = [pygame.image.load('images/sprites/animals/animals_37.png'),
-		  pygame.image.load('images/sprites/animals/animals_39.png'),
-		  pygame.image.load('images/sprites/animals/animals_37.png'),
-		  pygame.image.load('images/sprites/animals/animals_39.png')]
-walkDown = [pygame.image.load('images/sprites/animals/animals_01.png'),
-			pygame.image.load('images/sprites/animals/animals_03.png'),
-			pygame.image.load('images/sprites/animals/animals_01.png'),
-			pygame.image.load('images/sprites/animals/animals_03.png')]
-
-dogcookie = [pygame.image.load('images/dogc.png'), pygame.image.load('images/dogc2.png'),
-			 pygame.image.load('images/dogc3.png'), pygame.image.load('images/dogc4.png')]
-
-deathspiritLeft = [pygame.image.load('images/deathspirit/deathspirit_22.png'),
-			pygame.image.load('images/deathspirit/deathspirit_23.png'),
-			pygame.image.load('images/deathspirit/deathspirit_24.png'),
-			pygame.image.load('images/deathspirit/deathspirit_23.png')]
-deathspiritRight = [pygame.image.load('images/deathspirit/deathspirit_34.png'),
-			 pygame.image.load('images/deathspirit/deathspirit_35.png'),
-			 pygame.image.load('images/deathspirit/deathspirit_36.png'),
-			 pygame.image.load('images/deathspirit/deathspirit_35.png')]
-deathspiritUp = [pygame.image.load('images/deathspirit/deathspirit_46.png'),
-		  pygame.image.load('images/deathspirit/deathspirit_47.png'),
-		  pygame.image.load('images/deathspirit/deathspirit_48.png'),
-		  pygame.image.load('images/deathspirit/deathspirit_47.png')]
-deathspiritDown = [pygame.image.load('images/deathspirit/deathspirit_10.png'),
-			pygame.image.load('images/deathspirit/deathspirit_11.png'),
-			pygame.image.load('images/deathspirit/deathspirit_12.png'),
-			pygame.image.load('images/deathspirit/deathspirit_11.png')]
-
-clock = pygame.time.Clock()
-
-score = 0
-
-pygame.mixer.music.load('sound/nintendogs.mp3')
-pygame.mixer.music.play(-1)
-font = pygame.font.SysFont("comicsans", 40, True)
-sound_bis = pygame.mixer.Sound("sound/coin.wav")
-pygame.mixer.Sound.set_volume(sound_bis, 0.25)
-
+from helper import *
 
 class Player:
 
 	def __init__(self, x, y, width, height):
-
 		self.x = x
 		self.y = y
 		self.width = int(width)
 		self.height = int(height)
 		self.vel = 5
-		self.left = False
-		self.right = False
-		self.up = False
-		self.down = False
+		self.left, self.right, self.up, self.down = False, False, False, False
 		self.walkCount = 0
 		self.mana = 150
 
-	def draw(self):
-		if self.walkCount == 15:
-			self.walkCount = 0
 
-		if self.left:
-			win.blit(walkLeft[self.walkCount // 4], (self.x, self.y))
-			self.walkCount += 1
-		elif self.right:
-			win.blit(walkRight[self.walkCount // 4], (self.x, self.y))
-			self.walkCount += 1
-		elif self.up:
-			win.blit(walkUp[self.walkCount // 8], (self.x, self.y))
-			self.walkCount += 1
-		else:
-			win.blit(walkDown[self.walkCount // 8], (self.x, self.y))
-			self.walkCount += 1
-
-		pygame.draw.rect(win, (0, 0, 255), (10, 520, self.mana, 10))
-
-
-	def _move(self, action):
-		if action[0] == 1 and self.x >= self.vel:
-			self.x -= self.vel
-			self.left = True
-			self.right = False
-			self.up = False
-			self.down = False
-
-			if action[0] == 1 and self.x < self.vel:
-				self.x = 0
-				self.left = True
-				self.right = False
-				self.up = False
-				self.down = False
-
-		if action[1] == 1 and self.x <= scrW - self.width - self.vel:
-			self.x += self.vel
-			self.right = True
-			self.left = False
-			self.up = False
-			self.down = False
-
-			if action[1] == 1 and self.x > scrW - self.width - self.vel:
-				self.x = scrW - self.width
-				self.right = True
-				self.left = False
-				self.down = False
-				self.up = False
-
-		if action[3] == 1 and self.y >= self.vel:
-			self.y -= self.vel
-			self.up = True
-			self.down = False
-			self.left = False
-			self.right = False
-
-			if action[3] == 1 and self.y < self.vel:
-				self.y = 0
-				self.up = True
-				self.down = False
-				self.left = False
-				self.right = False
-
-		if action[4] == 1 and self.y <= scrH - self.height - self.vel:
-			self.y += self.vel
-			self.down = True
-			self.up = False
-			self.left = False
-			self.right = False
-
-			if action[4] == 1 and self.y > scrH - self.height - self.vel:
-				self.y = scrH - self.height
-				self.down = True
-				self.up = False
-				self.left = False
-				self.right = False
-
-		if action[5] == 1:
-			if self.mana > 1:
-				self.mana -= 1
-				self.vel = 8
-			else:
-				self.vel = 5
-
-		if not keys[pygame.K_SPACE]:
-			self.vel = 5
-
-
-
-class Deathspirit:
+class Monster:
 	def __init__(self, x, y, width, height, type):
-		self.x = x
-		self.y = y
-		self.width = int(width)
-		self.height = int(height)
+		self.x, self.y = x, y
+		self.width, self.height = int(width), int(height)
 		self.type = type
 		self.vel = 3
-		self.left = False
-		self.right = False
-		self.up = False
-		self.down = False
+		self.left, self.right, self.up, self.down = False, False, False, False
 		self.walkCount = 0
 		self.mana = 150
 
-	def draw(self):
-		if self.walkCount == 15:
-			self.walkCount = 0
 
-		if self.left:
-			win.blit(deathspiritLeft[self.walkCount // 4], (self.x, self.y))
-			self.walkCount += 1
-		elif self.right:
-			win.blit(deathspiritRight[self.walkCount // 4], (self.x, self.y))
-			self.walkCount += 1
-		elif self.up:
-			win.blit(deathspiritUp[self.walkCount // 8], (self.x, self.y))
-			self.walkCount += 1
-		else:
-			win.blit(deathspiritDown[self.walkCount // 8], (self.x, self.y))
-			self.walkCount += 1
-
-	def movement(self, type):
-		if self.type == 1:
-			if self.x + 5 < dog.x:
-				self.x += self.vel
-				self.down = False
-				self.up = False
-				self.left = False
-				self.right = True
-
-			elif self.x - 5 > dog.x:
-				self.x -= self.vel
-				self.down = False
-				self.up = False
-				self.left = True
-				self.right = False
-			#
-			elif self.y < dog.y:
-				self.y += self.vel
-				self.down = True
-				self.up = False
-				self.left = False
-				self.right = False
-
-			elif self.y > dog.y:
-				self.y -= self.vel
-				self.down = False
-				self.up = True
-				self.left = False
-				self.right = False
-
-		else:
-			if self.y + 5 < dog.y:
-				self.y += self.vel
-				self.down = True
-				self.up = False
-				self.left = False
-				self.right = False
-
-			elif self.y - 5 > dog.y:
-				self.y -= self.vel
-				self.down = False
-				self.up = True
-				self.left = False
-				self.right = False
-
-			elif self.x < dog.x:
-				self.x += self.vel
-				self.down = False
-				self.up = False
-				self.left = False
-				self.right = True
-
-			elif self.x > dog.x:
-				self.x -= self.vel
-				self.down = False
-				self.up = False
-				self.left = True
-				self.right = False
-			#
-
-
-class Objects:
+class Cookie:
 
 	def __init__(self):
-		self.rng_x = random.randint(2, 18)
-		self.rng_y = random.randint(2, 13)
+		self.x, self.y  = random.randint(2, 18), random.randint(2, 13)
 		self.walkCount = 0
 
-	def draw(self):
-		if self.walkCount == 19:
-			self.walkCount = 0
-		win.blit(dogcookie[self.walkCount // 5], (self.rng_x * 40, self.rng_y * 40))
-		self.walkCount += 1
+
+class DogGameAI():
 
 
-def redraw():
-	win.blit(bg, (0, 0))
+	def __init__(self):
+		self.player = Player(200, 200, 64, 64)
+		self.monster_1 = Monster(0, 0, 64, 64, 1)
+		self.monster_2 = Monster(736, 536, 64, 64, 0)
+		self.biscoito = Cookie()
+		self.score = 0
+		self.frame_iteration = 0
 
-	text = font.render("Score: " + str(score), 1, (255, 255, 255))
-	win.blit(text, (15, 530))
-	dog.draw()
-	biscoito.draw()
-	deathspirit1.draw()
-	deathspirit2.draw()
-	pygame.display.update()
+		pygame.mixer.pre_init(44100, -16, 1, 512)
+		pygame.init()
 
+		self.win = pygame.display.set_mode((scrW, scrH))
+		pygame.display.set_caption("Dog Game")
 
-# main
-dog = Player(200, 200, 64, 64)
-deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
-deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
-biscoito = Objects()
-gen = 0
-run = True
+		self.clock = pygame.time.Clock()
 
-while run:
-
-	clock.tick(30)
-
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			run = False
-
-	keys = pygame.key.get_pressed()  # KEYS
-	dog._move(action = 1)
-
-	if biscoito.rng_x * 40 - 64 <= dog.x <= biscoito.rng_x * 40 + 48 and biscoito.rng_y * 40 - 64 <= dog.y <= biscoito.rng_y * 40 + 32:
-		biscoito.rng_x = random.randint(2, 18)
-		biscoito.rng_y = random.randint(2, 13)
-		dog.mana += 10
-		sound_bis.play()
-		score += 1
-		deathspirit1.vel += 0.1
-		deathspirit2.vel += 0.1
-		reward = 10
-
-	deathspirit1.movement(1)
-	deathspirit2.movement(2)
-
-	if deathspirit1.x - 40 <= dog.x <= deathspirit1.x + 40 and deathspirit1.y - 40 <= dog.y <= deathspirit1.y + 40:
-		dog = Player(200, 200, 64, 64)
-		deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
-		deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
-		biscoito = Objects()
-		score = 0
+		self.sound_bis = pygame.mixer.Sound("sound/coin.wav")
 		pygame.mixer.music.load('sound/nintendogs.mp3')
+		pygame.mixer.Sound.set_volume(self.sound_bis, 0.25)
+
+		self.font = pygame.font.SysFont("comicsans", 40, True)
+
+		self.game_over = False
+
+	def reset(self):
+		self.game_over = False
 		pygame.mixer.music.play(-1)
-		reward = -10
+		self.player = Player(200, 200, 64, 64)
+		self.monster_1 = Monster(0, 0, 64, 64, 1)
+		self.monster_2 = Monster(736, 536, 64, 64, 0)
+		self.biscoito = Cookie()
+		self.inputs = [0, 0, 0, 0, 0] # Left, Right, Up, Down, Spacebar
+		self.score = 0
+		self.frame_iteration = 0
 
-	if deathspirit2.x - 40 <= dog.x <= deathspirit2.x + 40 and deathspirit2.y - 40 <= dog.y <= deathspirit2.y + 40:
-		dog = Player(200, 200, 64, 64)
-		deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
-		deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
-		biscoito = Objects()
-		score = 0
-		pygame.mixer.music.load('sound/nintendogs.mp3')
-		pygame.mixer.music.play(-1)
-		reward = -10
+	def play_step(self, action):
+		self.frame_iteration += 1
+		# 1. Collect user input
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				quit()
 
-	if keys[pygame.K_1]:
-		break
+		# 2. Movement
+		self._move(action)
+		self._move_monsters()
 
-	if dog.mana < 150:
-		dog.mana += 1/10
+		# 3. Check if game ends
+		reward = -0.1
+		if self.monster_1.x - 40 <= self.player.x <= self.monster_1.x + 40 and self.monster_1.y - 40 <= self.player.y <= self.monster_1.y + 40:
+			self.game_over = True
+			reward = -100
+			return reward, self.game_over, self.score
 
-	redraw()
+		if self.monster_2.x - 40 <= self.player.x <= self.monster_2.x + 40 and self.monster_2.y - 40 <= self.player.y <= self.monster_2.y + 40:
+			self.game_over = True
+			reward = -100
+			return reward, self.game_over, self.score
 
-pygame.quit()
+		# 4. Check cookie colision
+		if self.biscoito.x * 40 - 64 <= self.player.x <= self.biscoito.x * 40 + 48 and self.biscoito.y * 40 - 64 <= self.player.y <= self.biscoito.y * 40 + 32:
+			self.biscoito.x = random.randint(2, 18)
+			self.biscoito.y = random.randint(2, 13)
+			self.player.mana += 10
+			self.sound_bis.play()
+			self.score += 1
+			self.monster_1.vel += 0.1
+			self.monster_2.vel += 0.1
+			reward = 1000
+
+		# 5. Redraw
+		self._redraw()
+
+		# 6. Reset inputs, return game over and score
+		self.inputs = [0, 0, 0, 0, 0]
+		return reward, self.game_over, self.score
+
+	def _move(self, action):
+
+		if action[4]:
+			if self.player.mana > 1:
+				self.player.mana -= 1
+				self.player.vel = 8
+
+			else:
+				self.player.vel = 5
+
+		else:
+			self.player.vel = 5
+
+		if action[0] > 0.5 and self.player.x >= self.player.vel:
+			self.player.x -= self.player.vel
+			self.player.left = True
+			self.player.right, self.player.up, self.player.down = False, False, False
+
+			if action[0] > 0.5 and self.player.x < self.player.vel:
+				self.player.x = 0
+				self.player.left = True
+				self.player.right, self.player.up, self.player.down = False, False, False
+
+		if action[1] > 0.5 and self.player.x <= scrW - self.player.width - self.player.vel:
+			self.player.x += self.player.vel
+			self.player.right = True
+			self.player.left, self.player.up, self.player.down = False, False, False
+
+			if action[1] > 0.5 and self.player.x > scrW - self.player.width - self.player.vel:
+				self.player.x = scrW - self.player.width
+				self.player.right = True
+				self.player.left, self.player.up, self.player.down = False, False, False
+
+		if action[2] > 0.5 and self.player.y >= self.player.vel:
+			self.player.y -= self.player.vel
+			self.player.up = True
+			self.player.down, self.player.left, self.player.right = False, False, False
+
+			if action[2] > 0.5 and self.player.y < self.player.vel:
+				self.player.y = 0
+				self.player.up = True
+				self.player.down, self.player.left, self.player.right = False, False, False
+
+		if action[3] > 0.5 and self.player.y <= scrH - self.player.height - self.player.vel:
+			self.player.y += self.player.vel
+			self.player.down = True
+			self.player.up, self.player.left, self.player.right = False, False, False
+
+			if action[3] > 0.5 and self.player.y > scrH - self.player.height - self.player.vel:
+				self.player.y = scrH - self.player.height
+				self.player.down = True
+				self.player.up, self.player.left, self.player.right = False, False, False
+
+
+	def _redraw(self):
+
+		self.win.blit(bg, (0, 0))
+
+		pygame.draw.rect(self.win, (0, 0, 255), (10, 520, self.player.mana, 10))
+		self.text = self.font.render("Score: " + str(self.score), 1, (255, 255, 255))
+		self.win.blit(self.text, (15, 530))
+
+		self._draw_player()
+		self._draw_cookie()
+		self._draw_monsters()
+
+		pygame.display.update()
+		self.clock.tick(30)
+
+	def _draw_player(self):
+		if self.player.walkCount == 15:
+			self.player.walkCount = 0
+
+		if self.player.left:
+			self.win.blit(player_left[self.player.walkCount // 4], (self.player.x, self.player.y))
+			self.player.walkCount += 1
+
+		elif self.player.right:
+			self.win.blit(player_right[self.player.walkCount // 4], (self.player.x, self.player.y))
+			self.player.walkCount += 1
+
+		elif self.player.up:
+			self.win.blit(player_up[self.player.walkCount // 8], (self.player.x, self.player.y))
+			self.player.walkCount += 1
+
+		else:
+			self.win.blit(player_down[self.player.walkCount // 8], (self.player.x, self.player.y))
+			self.player.walkCount += 1
+
+	def _draw_cookie(self):
+		if self.biscoito.walkCount == 19:
+			self.biscoito.walkCount = 0
+
+		self.win.blit(dogcookie[self.biscoito.walkCount // 5], (self.biscoito.x * 40, self.biscoito.y * 40))
+		self.biscoito.walkCount += 1
+
+	def _draw_monsters(self):
+		if self.monster_1.walkCount == 15:
+			self.monster_1.walkCount = 0
+
+		if self.monster_1.left:
+			self.win.blit(monster_left[self.monster_1.walkCount // 4], (self.monster_1.x, self.monster_1.y))
+			self.monster_1.walkCount += 1
+		elif self.monster_1.right:
+			self.win.blit(monster_right[self.monster_1.walkCount // 4], (self.monster_1.x, self.monster_1.y))
+			self.monster_1.walkCount += 1
+		elif self.monster_1.up:
+			self.win.blit(deathspiritUp[self.monster_1.walkCount // 8], (self.monster_1.x, self.monster_1.y))
+			self.monster_1.walkCount += 1
+		else:
+			self.win.blit(monster_down[self.monster_1.walkCount // 8], (self.monster_1.x, self.monster_1.y))
+			self.monster_1.walkCount += 1
+
+		if self.monster_2.walkCount == 15:
+			self.monster_2.walkCount = 0
+
+		if self.monster_2.left:
+			self.win.blit(monster_left[self.monster_2.walkCount // 4], (self.monster_2.x, self.monster_2.y))
+			self.monster_2.walkCount += 1
+		elif self.monster_2.right:
+			self.win.blit(monster_right[self.monster_2.walkCount // 4], (self.monster_2.x, self.monster_2.y))
+			self.monster_2.walkCount += 1
+		elif self.monster_2.up:
+			self.win.blit(monster_up[self.monster_2.walkCount // 8], (self.monster_2.x, self.monster_2.y))
+			self.monster_2.walkCount += 1
+		else:
+			self.win.blit(monster_down[self.monster_2.walkCount // 8], (self.monster_2.x, self.monster_2.y))
+			self.monster_2.walkCount += 1
+
+	def _move_monsters(self):
+		if self.monster_1.x + 5 < self.player.x:
+			self.monster_1.x += self.monster_1.vel
+			self.monster_1.down = False
+			self.monster_1.up = False
+			self.monster_1.left = False
+			self.monster_1.right = True
+
+		elif self.monster_1.x - 5 > self.player.x:
+			self.monster_1.x -= self.monster_1.vel
+			self.monster_1.down = False
+			self.monster_1.up = False
+			self.monster_1.left = True
+			self.monster_1.right = False
+		#
+		elif self.monster_1.y < self.player.y:
+			self.monster_1.y += self.monster_1.vel
+			self.monster_1.down = True
+			self.monster_1.up = False
+			self.monster_1.left = False
+			self.monster_1.right = False
+
+		elif self.monster_1.y > self.player.y:
+			self.monster_1.y -= self.monster_1.vel
+			self.monster_1.down = False
+			self.monster_1.up = True
+			self.monster_1.left = False
+			self.monster_1.right = False
+
+		if self.monster_2.y + 5 < self.player.y:
+			self.monster_2.y += self.monster_2.vel
+			self.monster_2.down = True
+			self.monster_2.up = False
+			self.monster_2.left = False
+			self.monster_2.right = False
+
+		elif self.monster_2.y - 5 > self.player.y:
+			self.monster_2.y -= self.monster_2.vel
+			self.monster_2.down = False
+			self.monster_2.up = True
+			self.monster_2.left = False
+			self.monster_2.right = False
+
+		elif self.monster_2.x < self.player.x:
+			self.monster_2.x += self.monster_2.vel
+			self.monster_2.down = False
+			self.monster_2.up = False
+			self.monster_2.left = False
+			self.monster_2.right = True
+
+		elif self.monster_2.x > self.player.x:
+			self.monster_2.x -= self.monster_2.vel
+			self.monster_2.down = False
+			self.monster_2.up = False
+			self.monster_2.left = True
+			self.monster_2.right = False
