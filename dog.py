@@ -141,159 +141,178 @@ class Cookie:
 		self.walkCount += 1
 
 
-
-
 class DogGame():
 
 	def __init__(self):
 		self.player = Player(200, 200, 64, 64)
-		self.
-		pygame.mixer.pre_init(44100, -16, 1, 512)
+		self.monster_1 = Deathspirit(0, 0, 64, 64, 1)
+		self.monster_2 = Deathspirit(736, 536, 64, 64, 0)
+		self.biscoito = Objects()
+		self.inputs = [0, 0, 0, 0, 0] # Left, Right, Up, Down, Spacebar
 
+		pygame.mixer.pre_init(44100, -16, 1, 512)
 		pygame.init()
 
-		scrH, scrW = 600, 800
-		win = pygame.display.set_mode((scrW, scrH))
+		self.win = pygame.display.set_mode((scrW, scrH))
 		pygame.display.set_caption("Dog Game")
 
 		self.clock = pygame.time.Clock()
+		self.clock.tick(30)
 
 		pygame.mixer.music.load('sound/nintendogs.mp3')
 		pygame.mixer.music.play(-1)
-
 		pygame.mixer.Sound.set_volume(sound_bis, 0.25)
 
-	def redraw():
-		win.blit(bg, (0, 0))
+		self.game_over = False
+
+	def redraw(self):
+		self.win.blit(bg, (0, 0))
 
 		pygame.draw.rect(win, (0, 0, 255), (10, 520, self.mana, 10))
-		text = font.render("Score: " + str(score), 1, (255, 255, 255))
-		win.blit(text, (15, 530))
+		self.text = font.render("Score: " + str(score), 1, (255, 255, 255))
+		self.win.blit(self.text, (15, 530))
 
-		dog.draw()
-		biscoito.draw()
-		deathspirit1.draw()
-		deathspirit2.draw()
+		self.player.draw()
+		self.biscoito.draw()
+		self.monster_1.draw()
+		self.monster_2.draw()
 		pygame.display.update()
 
+	def play_step(self):
 
-deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
-deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
-biscoito = Objects()
-run = True
+		# 1. Collect user input
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				quit()
 
-while run:
+			if event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_LEFT:
+					inputs[0] = 1
 
-	clock.tick(30)
+				if event.key == pygame.K_LEFT:
+					inputs[1] = 1
 
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			run = False
+				if event.key == pygame.K_LEFT:
+					inputs[2] = 1
 
-	keys = pygame.key.get_pressed()  # KEYS
+				if event.key == pygame.K_LEFT:
+					inputs[3] = 1
 
-	if keys[pygame.K_LEFT] and dog.x >= dog.vel:
-		dog.x -= dog.vel
-		dog.left = True
-		dog.right = False
-		dog.up = False
-		dog.down = False
+				if event.key == pygame.K_LEFT:
+					inputs[4] = 1
 
-		if keys[pygame.K_LEFT] and dog.x < dog.vel:
-			dog.x = 0
+		# 2. Movement
+		self._move(self.inputs)
+
+	def _move(self, inputs):
+		if input[0] and dog.x >= dog.vel:
+			dog.x -= dog.vel
 			dog.left = True
-			dog.right = False
-			dog.up = False
-			dog.down = False
+			dog.right, dog.up, dog.down = False
 
-	if keys[pygame.K_RIGHT] and dog.x <= scrW - dog.width - dog.vel:
-		dog.x += dog.vel
-		dog.right = True
-		dog.left = False
-		dog.up = False
-		dog.down = False
+			if keys[pygame.K_LEFT] and dog.x < dog.vel:
+				dog.x = 0
+				dog.left = True
+				dog.right, dog.up, dog.down = False
 
-		if keys[pygame.K_RIGHT] and dog.x > scrW - dog.width - dog.vel:
-			dog.x = scrW - dog.width
+		if keys[pygame.K_RIGHT] and dog.x <= scrW - dog.width - dog.vel:
+			dog.x += dog.vel
 			dog.right = True
 			dog.left = False
-			dog.down = False
 			dog.up = False
+			dog.down = False
 
-	if keys[pygame.K_UP] and dog.y >= dog.vel:
-		dog.y -= dog.vel
-		dog.up = True
-		dog.down = False
-		dog.left = False
-		dog.right = False
+			if keys[pygame.K_RIGHT] and dog.x > scrW - dog.width - dog.vel:
+				dog.x = scrW - dog.width
+				dog.right = True
+				dog.left = False
+				dog.down = False
+				dog.up = False
 
-		if keys[pygame.K_UP] and dog.y < dog.vel:
-			dog.y = 0
+		if keys[pygame.K_UP] and dog.y >= dog.vel:
+			dog.y -= dog.vel
 			dog.up = True
 			dog.down = False
 			dog.left = False
 			dog.right = False
 
-	if keys[pygame.K_DOWN] and dog.y <= scrH - dog.height - dog.vel:
-		dog.y += dog.vel
-		dog.down = True
-		dog.up = False
-		dog.left = False
-		dog.right = False
+			if keys[pygame.K_UP] and dog.y < dog.vel:
+				dog.y = 0
+				dog.up = True
+				dog.down = False
+				dog.left = False
+				dog.right = False
 
-		if keys[pygame.K_DOWN] and dog.y > scrH - dog.height - dog.vel:
-			dog.y = scrH - dog.height
+		if keys[pygame.K_DOWN] and dog.y <= scrH - dog.height - dog.vel:
+			dog.y += dog.vel
 			dog.down = True
 			dog.up = False
 			dog.left = False
 			dog.right = False
 
-	if keys[pygame.K_SPACE]:
-		if dog.mana > 1:
-			dog.mana -= 1
-			dog.vel = 8
-		else:
+			if keys[pygame.K_DOWN] and dog.y > scrH - dog.height - dog.vel:
+				dog.y = scrH - dog.height
+				dog.down = True
+				dog.up = False
+				dog.left = False
+				dog.right = False
+
+		if keys[pygame.K_SPACE]:
+			if dog.mana > 1:
+				dog.mana -= 1
+				dog.vel = 8
+			else:
+				dog.vel = 5
+
+		if not keys[pygame.K_SPACE]:
 			dog.vel = 5
 
-	if not keys[pygame.K_SPACE]:
-		dog.vel = 5
 
-	if biscoito.rng_x * 40 - 64 <= dog.x <= biscoito.rng_x * 40 + 48 and biscoito.rng_y * 40 - 64 <= dog.y <= biscoito.rng_y * 40 + 32:
-		biscoito.rng_x = random.randint(2, 18)
-		biscoito.rng_y = random.randint(2, 13)
-		dog.mana += 10
-		sound_bis.play()
-		score += 1
-		deathspirit1.vel += 0.1
-		deathspirit2.vel += 0.1
 
-	deathspirit1.movement(1)
-	deathspirit2.movement(2)
 
-	if deathspirit1.x - 40 <= dog.x <= deathspirit1.x + 40 and deathspirit1.y - 40 <= dog.y <= deathspirit1.y + 40:
-		dog = Player(200, 200, 64, 64)
-		deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
-		deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
-		biscoito = Objects()
-		score = 0
-		pygame.mixer.music.load('sound/nintendogs.mp3')
-		pygame.mixer.music.play(-1)
 
-	if deathspirit2.x - 40 <= dog.x <= deathspirit2.x + 40 and deathspirit2.y - 40 <= dog.y <= deathspirit2.y + 40:
-		dog = Player(200, 200, 64, 64)
-		deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
-		deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
-		biscoito = Objects()
-		score = 0
-		pygame.mixer.music.load('sound/nintendogs.mp3')
-		pygame.mixer.music.play(-1)
+if __name__ == '__main__':
+	game = DogGame()
 
-	if keys[pygame.K_1]:
-		break
+	while True:
 
-	if dog.mana < 150:
-		dog.mana += 1/10
+		if biscoito.rng_x * 40 - 64 <= dog.x <= biscoito.rng_x * 40 + 48 and biscoito.rng_y * 40 - 64 <= dog.y <= biscoito.rng_y * 40 + 32:
+			biscoito.rng_x = random.randint(2, 18)
+			biscoito.rng_y = random.randint(2, 13)
+			dog.mana += 10
+			sound_bis.play()
+			score += 1
+			deathspirit1.vel += 0.1
+			deathspirit2.vel += 0.1
 
-	redraw()
+		deathspirit1.movement(1)
+		deathspirit2.movement(2)
 
-pygame.quit()
+		if deathspirit1.x - 40 <= dog.x <= deathspirit1.x + 40 and deathspirit1.y - 40 <= dog.y <= deathspirit1.y + 40:
+			dog = Player(200, 200, 64, 64)
+			deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
+			deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
+			biscoito = Objects()
+			score = 0
+			pygame.mixer.music.load('sound/nintendogs.mp3')
+			pygame.mixer.music.play(-1)
+
+		if deathspirit2.x - 40 <= dog.x <= deathspirit2.x + 40 and deathspirit2.y - 40 <= dog.y <= deathspirit2.y + 40:
+			dog = Player(200, 200, 64, 64)
+			deathspirit1 = Deathspirit(0, 0, 64, 64, 1)
+			deathspirit2 = Deathspirit(736, 536, 64, 64, 0)
+			biscoito = Objects()
+			score = 0
+			pygame.mixer.music.load('sound/nintendogs.mp3')
+			pygame.mixer.music.play(-1)
+
+		if keys[pygame.K_1]:
+			break
+
+		if dog.mana < 150:
+			dog.mana += 1/10
+
+		redraw()
+
+	pygame.quit()

@@ -63,6 +63,7 @@ dogcookie = [pygame.image.load('images/dogc.png'), pygame.image.load('images/dog
 
 font = pygame.font.SysFont("comicsans", 40, True)
 sound_bis = pygame.mixer.Sound("sound/coin.wav")
+scrH, scrW = 600, 800
 
 #---------------------------------------------------------------------------
 ## Plotting ----------------------------------------------------------------
