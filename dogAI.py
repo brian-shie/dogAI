@@ -43,7 +43,11 @@ class DogGameAI():
 		self.player = Player(200, 200, 64, 64)
 		self.monster_1 = Monster(0, 0, 64, 64, 1)
 		self.monster_2 = Monster(736, 536, 64, 64, 0)
-		self.biscoito = Cookie()
+		self.biscoito_1 = Cookie()
+		self.biscoito_2 = Cookie()
+		self.biscoito_3 = Cookie()
+		self.biscoito_4 = Cookie()
+
 		self.score = 0
 		self.frame_iteration = 0
 
@@ -68,8 +72,13 @@ class DogGameAI():
 		# pygame.mixer.music.play(-1)
 		self.player = Player(200, 200, 64, 64)
 		self.monster_1 = Monster(0, 0, 64, 64, 1)
-		self.monster_2 = Monster(736, 536, 64, 64, 0)
-		self.biscoito = Cookie()
+		# self.monster_2 = Monster(736, 536, 64, 64, 0)
+		self.biscoito_1 = Cookie()
+		self.biscoito_2 = Cookie()
+		self.biscoito_3 = Cookie()
+		self.biscoito_4 = Cookie()
+
+
 		self.inputs = [0, 0, 0, 0, 0] # Left, Right, Up, Down, Spacebar
 		self.score = 0
 		self.frame_iteration = 0
@@ -87,26 +96,56 @@ class DogGameAI():
 		self._move_monsters()
 
 		# 3. Check if game ends
-		reward = 0
+		reward = -0.001
 		if self.monster_1.x - 40 <= self.player.x <= self.monster_1.x + 40 and self.monster_1.y - 40 <= self.player.y <= self.monster_1.y + 40:
 			self.game_over = True
 			reward = -10
 			return reward, self.game_over, self.score
-
-		if self.monster_2.x - 40 <= self.player.x <= self.monster_2.x + 40 and self.monster_2.y - 40 <= self.player.y <= self.monster_2.y + 40:
-			self.game_over = True
-			reward = -10
-			return reward, self.game_over, self.score
+		#
+		# if self.monster_2.x - 40 <= self.player.x <= self.monster_2.x + 40 and self.monster_2.y - 40 <= self.player.y <= self.monster_2.y + 40:
+		# 	self.game_over = True
+		# 	reward = -10
+		# 	return reward, self.game_over, self.score
 
 		# 4. Check cookie colision
-		if self.biscoito.x * 40 - 64 <= self.player.x <= self.biscoito.x * 40 + 48 and self.biscoito.y * 40 - 64 <= self.player.y <= self.biscoito.y * 40 + 32:
-			self.biscoito.x = random.randint(2, 18)
-			self.biscoito.y = random.randint(2, 13)
+		if self.biscoito_1.x * 40 - 64 <= self.player.x <= self.biscoito_1.x * 40 + 48 and self.biscoito_1.y * 40 - 64 <= self.player.y <= self.biscoito_1.y * 40 + 32:
+			self.biscoito_1.x = random.randint(2, 18)
+			self.biscoito_1.y = random.randint(2, 13)
 			self.player.mana += 10
 			# self.sound_bis.play()
 			self.score += 1
 			self.monster_1.vel += 0.1
-			self.monster_2.vel += 0.1
+			# self.monster_2.vel += 0.1
+			reward = 10
+
+		if self.biscoito_2.x * 40 - 64 <= self.player.x <= self.biscoito_2.x * 40 + 48 and self.biscoito_2.y * 40 - 64 <= self.player.y <= self.biscoito_2.y * 40 + 32:
+			self.biscoito_2.x = random.randint(2, 18)
+			self.biscoito_2.y = random.randint(2, 13)
+			self.player.mana += 10
+			# self.sound_bis.play()
+			self.score += 1
+			self.monster_1.vel += 0.1
+			# self.monster_2.vel += 0.1
+			reward = 10
+
+		if self.biscoito_3.x * 40 - 64 <= self.player.x <= self.biscoito_3.x * 40 + 48 and self.biscoito_3.y * 40 - 64 <= self.player.y <= self.biscoito_3.y * 40 + 32:
+			self.biscoito_3.x = random.randint(2, 18)
+			self.biscoito_3.y = random.randint(2, 13)
+			self.player.mana += 10
+			# self.sound_bis.play()
+			self.score += 1
+			self.monster_1.vel += 0.1
+			# self.monster_2.vel += 0.1
+			reward = 10
+
+		if self.biscoito_4.x * 40 - 64 <= self.player.x <= self.biscoito_4.x * 40 + 48 and self.biscoito_4.y * 40 - 64 <= self.player.y <= self.biscoito_4.y * 40 + 32:
+			self.biscoito_4.x = random.randint(2, 18)
+			self.biscoito_4.y = random.randint(2, 13)
+			self.player.mana += 10
+			# self.sound_bis.play()
+			self.score += 1
+			self.monster_1.vel += 0.1
+			# self.monster_2.vel += 0.1
 			reward = 10
 
 		# 5. Redraw
@@ -206,11 +245,17 @@ class DogGameAI():
 			self.player.walkCount += 1
 
 	def _draw_cookie(self):
-		if self.biscoito.walkCount == 19:
-			self.biscoito.walkCount = 0
+		if self.biscoito_1.walkCount == 19:
+			self.biscoito_1.walkCount = 0
+			self.biscoito_2.walkCount = 0
+			self.biscoito_3.walkCount = 0
+			self.biscoito_4.walkCount = 0
 
-		self.win.blit(dogcookie[self.biscoito.walkCount // 5], (self.biscoito.x * 40, self.biscoito.y * 40))
-		self.biscoito.walkCount += 1
+		self.win.blit(dogcookie[self.biscoito_1.walkCount // 5], (self.biscoito_1.x * 40, self.biscoito_1.y * 40))
+		self.win.blit(dogcookie[self.biscoito_1.walkCount // 5], (self.biscoito_2.x * 40, self.biscoito_2.y * 40))
+		self.win.blit(dogcookie[self.biscoito_1.walkCount // 5], (self.biscoito_3.x * 40, self.biscoito_3.y * 40))
+		self.win.blit(dogcookie[self.biscoito_1.walkCount // 5], (self.biscoito_4.x * 40, self.biscoito_4.y * 40))
+		self.biscoito_1.walkCount += 1
 
 	def _draw_monsters(self):
 		if self.monster_1.walkCount == 15:
@@ -223,7 +268,7 @@ class DogGameAI():
 			self.win.blit(monster_right[self.monster_1.walkCount // 4], (self.monster_1.x, self.monster_1.y))
 			self.monster_1.walkCount += 1
 		elif self.monster_1.up:
-			self.win.blit(deathspiritUp[self.monster_1.walkCount // 8], (self.monster_1.x, self.monster_1.y))
+			self.win.blit(monster_up[self.monster_1.walkCount // 8], (self.monster_1.x, self.monster_1.y))
 			self.monster_1.walkCount += 1
 		else:
 			self.win.blit(monster_down[self.monster_1.walkCount // 8], (self.monster_1.x, self.monster_1.y))
@@ -274,30 +319,30 @@ class DogGameAI():
 			self.monster_1.left = False
 			self.monster_1.right = False
 
-		if self.monster_2.y + 5 < self.player.y:
-			self.monster_2.y += self.monster_2.vel
-			self.monster_2.down = True
-			self.monster_2.up = False
-			self.monster_2.left = False
-			self.monster_2.right = False
-
-		elif self.monster_2.y - 5 > self.player.y:
-			self.monster_2.y -= self.monster_2.vel
-			self.monster_2.down = False
-			self.monster_2.up = True
-			self.monster_2.left = False
-			self.monster_2.right = False
-
-		elif self.monster_2.x < self.player.x:
-			self.monster_2.x += self.monster_2.vel
-			self.monster_2.down = False
-			self.monster_2.up = False
-			self.monster_2.left = False
-			self.monster_2.right = True
-
-		elif self.monster_2.x > self.player.x:
-			self.monster_2.x -= self.monster_2.vel
-			self.monster_2.down = False
-			self.monster_2.up = False
-			self.monster_2.left = True
-			self.monster_2.right = False
+		# if self.monster_2.y + 5 < self.player.y:
+		# 	self.monster_2.y += self.monster_2.vel
+		# 	self.monster_2.down = True
+		# 	self.monster_2.up = False
+		# 	self.monster_2.left = False
+		# 	self.monster_2.right = False
+		#
+		# elif self.monster_2.y - 5 > self.player.y:
+		# 	self.monster_2.y -= self.monster_2.vel
+		# 	self.monster_2.down = False
+		# 	self.monster_2.up = True
+		# 	self.monster_2.left = False
+		# 	self.monster_2.right = False
+		#
+		# elif self.monster_2.x < self.player.x:
+		# 	self.monster_2.x += self.monster_2.vel
+		# 	self.monster_2.down = False
+		# 	self.monster_2.up = False
+		# 	self.monster_2.left = False
+		# 	self.monster_2.right = True
+		#
+		# elif self.monster_2.x > self.player.x:
+		# 	self.monster_2.x -= self.monster_2.vel
+		# 	self.monster_2.down = False
+		# 	self.monster_2.up = False
+		# 	self.monster_2.left = True
+		# 	self.monster_2.right = False

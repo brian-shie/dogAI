@@ -7,7 +7,7 @@ from model import Linear_QNet, QTrainer
 from dogAI import DogGameAI
 from helper import *
 
-max_memory = 100_000
+max_memory = 1_000_000
 batch_size = 1000
 learning_rate = 0.0001
 
@@ -16,25 +16,38 @@ class Agent:
 	def __init__(self):
 		self.n_games = 0
 		self.epsilon = 0 # aleatoriedade
-		self.gamma = 0.95 # taxa de desconto
+		self.gamma = 0.9 # taxa de desconto
 		self.memory = deque(maxlen = max_memory) # se alcança o limite: popleft()
-		self.model = Linear_QNet(18, 128, 8)
+		self.model = Linear_QNet(26, 128, 8)
 		self.trainer = QTrainer(self.model, lr=learning_rate, gamma=self.gamma)
 
 	def get_state(self, game):
 		state = [
-			np.floor(game.player.x/20), np.floor(game.player.y/20), # game.player.mana, # Player
-			np.floor((game.player.x - game.biscoito.x)/20), np.floor(game.player.y/20 - game.biscoito.y/20), # Biscoito
-			np.floor(game.player.x/20 - game.monster_2.x/20), np.floor(game.player.y/20 - game.monster_2.y/20),  # Mobs
-			np.floor(game.player.x/20 - game.monster_1.x/20),  np.floor(game.player.y/20 - game.monster_1.y/20),
+			np.floor(game.player.x/12), np.floor(game.player.y/20), # game.player.mana, # Player
+			np.floor((game.player.x - game.biscoito_1.x)/20), np.floor(game.player.y/20 - game.biscoito_1.y/20), # Biscoito
+			np.floor((game.player.x - game.biscoito_2.x)/20), np.floor(game.player.y/20 - game.biscoito_2.y/20), # Biscoito
+			np.floor((game.player.x - game.biscoito_3.x)/20), np.floor(game.player.y/20 - game.biscoito_3.y/20), # Biscoito
+			np.floor((game.player.x - game.biscoito_4.x)/20), np.floor(game.player.y/20 - game.biscoito_4.y/20), # Biscoito
+			np.floor(game.player.x/20 - game.monster_1.x/20),  np.floor(game.player.y/20 - game.monster_1.y/20),  # Mobs
+			# np.floor(game.player.x/20 - game.monster_2.x/20), np.floor(game.player.y/20 - game.monster_2.y/20),
+
 
 			game.monster_1.x - 40 <= game.player.x <= game.monster_1.x + 40,
 			game.monster_1.y - 40 <= game.player.y <= game.monster_1.y + 40,
-			game.monster_2.x - 40 <= game.player.x <= game.monster_2.x + 40,
-			game.monster_2.y - 40 <= game.player.y <= game.monster_2.y + 40,
+			# game.monster_2.x - 40 <= game.player.x <= game.monster_2.x + 40,
+			# game.monster_2.y - 40 <= game.player.y <= game.monster_2.y + 40,
 
-			game.biscoito.x * 40 - 64 <= game.player.x <= game.biscoito.x * 40 + 48,
-			game.biscoito.y * 40 - 64 <= game.player.y <= game.biscoito.y * 40 + 32,
+			game.biscoito_1.x * 40 - 64 <= game.player.x <= game.biscoito_1.x * 40 + 48,
+			game.biscoito_1.y * 40 - 64 <= game.player.y <= game.biscoito_1.y * 40 + 32,
+
+			game.biscoito_2.x * 40 - 64 <= game.player.x <= game.biscoito_2.x * 40 + 48,
+			game.biscoito_2.y * 40 - 64 <= game.player.y <= game.biscoito_2.y * 40 + 32,
+
+			game.biscoito_3.x * 40 - 64 <= game.player.x <= game.biscoito_3.x * 40 + 48,
+			game.biscoito_3.y * 40 - 64 <= game.player.y <= game.biscoito_3.y * 40 + 32,
+
+			game.biscoito_4.x * 40 - 64 <= game.player.x <= game.biscoito_4.x * 40 + 48,
+			game.biscoito_4.y * 40 - 64 <= game.player.y <= game.biscoito_4.y * 40 + 32,
 
 			game.player.x < game.player.vel,
 			game.player.x > scrW - game.player.width - game.player.vel,
