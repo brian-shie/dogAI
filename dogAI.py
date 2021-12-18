@@ -47,7 +47,7 @@ class DogGameAI():
 		self.score = 0
 		self.frame_iteration = 0
 
-		pygame.mixer.pre_init(44100, -16, 1, 512)
+		# pygame.mixer.pre_init(44100, -16, 1, 512)
 		pygame.init()
 
 		self.win = pygame.display.set_mode((scrW, scrH))
@@ -55,9 +55,9 @@ class DogGameAI():
 
 		self.clock = pygame.time.Clock()
 
-		self.sound_bis = pygame.mixer.Sound("sound/coin.wav")
-		pygame.mixer.music.load('sound/nintendogs.mp3')
-		pygame.mixer.Sound.set_volume(self.sound_bis, 0.25)
+		# self.sound_bis = pygame.mixer.Sound("sound/coin.wav")
+		# pygame.mixer.music.load('sound/nintendogs.mp3')
+		# pygame.mixer.Sound.set_volume(self.sound_bis, 0.25)
 
 		self.font = pygame.font.SysFont("comicsans", 40, True)
 
@@ -65,7 +65,7 @@ class DogGameAI():
 
 	def reset(self):
 		self.game_over = False
-		pygame.mixer.music.play(-1)
+		# pygame.mixer.music.play(-1)
 		self.player = Player(200, 200, 64, 64)
 		self.monster_1 = Monster(0, 0, 64, 64, 1)
 		self.monster_2 = Monster(736, 536, 64, 64, 0)
@@ -87,15 +87,15 @@ class DogGameAI():
 		self._move_monsters()
 
 		# 3. Check if game ends
-		reward = -0.1
+		reward = 0.001
 		if self.monster_1.x - 40 <= self.player.x <= self.monster_1.x + 40 and self.monster_1.y - 40 <= self.player.y <= self.monster_1.y + 40:
 			self.game_over = True
-			reward = -100
+			reward = -1000
 			return reward, self.game_over, self.score
 
 		if self.monster_2.x - 40 <= self.player.x <= self.monster_2.x + 40 and self.monster_2.y - 40 <= self.player.y <= self.monster_2.y + 40:
 			self.game_over = True
-			reward = -100
+			reward = -10
 			return reward, self.game_over, self.score
 
 		# 4. Check cookie colision
@@ -103,11 +103,11 @@ class DogGameAI():
 			self.biscoito.x = random.randint(2, 18)
 			self.biscoito.y = random.randint(2, 13)
 			self.player.mana += 10
-			self.sound_bis.play()
+			# self.sound_bis.play()
 			self.score += 1
 			self.monster_1.vel += 0.1
 			self.monster_2.vel += 0.1
-			reward = 1000
+			reward = 200
 
 		# 5. Redraw
 		self._redraw()
@@ -118,16 +118,16 @@ class DogGameAI():
 
 	def _move(self, action):
 
-		if action[4]:
-			if self.player.mana > 1:
-				self.player.mana -= 1
-				self.player.vel = 8
-
-			else:
-				self.player.vel = 5
-
-		else:
-			self.player.vel = 5
+		# if action[4] > 0.5:
+		# 	if self.player.mana > 1:
+		# 		self.player.mana -= 1
+		# 		self.player.vel = 8
+		#
+		# 	else:
+		# 		self.player.vel = 5
+		#
+		# else:
+		# 	self.player.vel = 5
 
 		if action[0] > 0.5 and self.player.x >= self.player.vel:
 			self.player.x -= self.player.vel

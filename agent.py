@@ -7,25 +7,26 @@ from model import Linear_QNet, QTrainer
 from dogAI import DogGameAI
 from helper import plot
 
-max_memory = 100_000
+max_memory = 1_000_000
 batch_size = 1000
-learning_rate = 0.005
+learning_rate = 0.0001
 
 class Agent:
 
 	def __init__(self):
 		self.n_games = 0
 		self.epsilon = 0 # aleatoriedade
-		self.gamma = 0 # taxa de desconto
+		self.gamma = 0.95 # taxa de desconto
 		self.memory = deque(maxlen = max_memory) # se alcança o limite: popleft()
-		self.model = Linear_QNet(10, 256, 5)
+		self.model = Linear_QNet(8, 400, 4)
 		self.trainer = QTrainer(self.model, lr=learning_rate, gamma=self.gamma)
 
 	def get_state(self, game):
 		state = [
-			game.player.x, game.player.y, game.player.mana, game.score, # Player
-			game.biscoito.x, game.biscoito.y, # Biscoito
-			game.monster_1.x, game.monster_1.y, game.monster_2.x, game.monster_2.y # Mobs
+			game.player.x, game.player.y, # game.player.mana, # Player
+			game.player.x - game.biscoito.x, game.player.y - game.biscoito.y, # Biscoito
+			game.player.x - game.monster_1.x,  game.player.y - game.monster_1.y,
+			game.player.x - game.monster_2.x, game.player.y - game.monster_2.y # Mobs
 		]
 
 		return state
@@ -49,15 +50,23 @@ class Agent:
 	def get_action(self, state):
 		# random moves: tradeoff exploration / exploitation
 		# self.epsilon = 620 - 100*np.log(self.n_games)
-		self.epsilon = 150 - self.n_games
-		final_move = [0, 0, 0, 0, 0, 0]
-		if random.randint(0, 200) < self.epsilon:
-			final_move = torch.tensor(bernoulli.rvs(size = 5, p = 0.5), dtype = int)
+		self.epsilon = 0
+		final_move = [0, 0, 0, 0]
+		if random.randint(0, 4000) < self.epsilon:
+			# final_move = bernoulli.rvs(size = 5, p = 0.5)
+			move = random.randint(0,3)
+			final_move[move] = 1
+			# print(final_move)
 
 		else:
+			# print(state)
 			state0 =  torch.tensor(state, dtype=torch.float)
-			final_move = self.model(state0)
-			print(final_move)
+			prediction = self.model(state0)
+			move = torch.argmax(prediction).item()
+			final_move[move] = 1
+
+			print(prediction)
+			# print(final_move)
 
 		# print(type(final_move))
 
@@ -99,11 +108,11 @@ def train():
 
 			print(f"Game:{agent.n_games} Score {score} Best Score {best_score} ")
 
-			plot_scores.append(score)
-			total_score += score
-			mean_score = total_score / agent.n_games
-			plot_mean_scores.append(mean_score)
-			plot(plot_scores, plot_mean_scores)
+			# plot_scores.append(score)
+			# total_score += score
+			# mean_score = total_score / agent.n_games
+			# plot_mean_scores.append(mean_score)
+			# plot(plot_scores, plot_mean_scores)
 
 if __name__ == '__main__':
 	train()

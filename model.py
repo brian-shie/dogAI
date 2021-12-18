@@ -13,7 +13,7 @@ class Linear_QNet(nn.Module):
 
 	def forward(self, x):
 		x = F.relu(self.linear1(x))
-		x = torch.sigmoid(self.linear2(x))
+		x = self.linear2(x)
 		return x
 
 	def save(self, file_name='model.pth'):
@@ -37,7 +37,7 @@ class QTrainer:
 		state = torch.tensor(state, dtype=torch.float)
 		next_state = torch.tensor(next_state, dtype=torch.float)
 		try:
-			action = torch.tensor(action, dtype=torch.float)
+			action = torch.tensor(action, dtype=torch.long)
 
 		except Exception:
 			print(action)
