@@ -5,7 +5,7 @@ from collections import deque
 from scipy.stats import bernoulli
 from model import Linear_QNet, QTrainer
 from dogAI import DogGameAI
-from helper import plot
+from helper import *
 
 max_memory = 100_000
 batch_size = 1000
@@ -21,17 +21,12 @@ class Agent:
 		self.model = Linear_QNet(18, 128, 8)
 		self.trainer = QTrainer(self.model, lr=learning_rate, gamma=self.gamma)
 
-	def _binning(x):
-		return np.floor(x/20)
-
-
-
 	def get_state(self, game):
 		state = [
-			np.floor(game.player.x), np.floor(game.player.y), # game.player.mana, # Player
-			np.floor(game.player.x - game.biscoito.x), np.floor(game.player.y - game.biscoito.y), # Biscoito
-			np.floor(game.player.x - game.monster_1.x),  np.floor(game.player.y - game.monster_1.y),
-			np.floor(game.player.x - game.monster_2.x), np.floor(game.player.y - game.monster_2.y),  # Mobs
+			np.floor(game.player.x/20), np.floor(game.player.y/20), # game.player.mana, # Player
+			np.floor((game.player.x - game.biscoito.x)/20), np.floor(game.player.y/20 - game.biscoito.y/20), # Biscoito
+			np.floor(game.player.x/20 - game.monster_2.x/20), np.floor(game.player.y/20 - game.monster_2.y/20),  # Mobs
+			np.floor(game.player.x/20 - game.monster_1.x/20),  np.floor(game.player.y/20 - game.monster_1.y/20),
 
 			game.monster_1.x - 40 <= game.player.x <= game.monster_1.x + 40,
 			game.monster_1.y - 40 <= game.player.y <= game.monster_1.y + 40,
@@ -47,7 +42,7 @@ class Agent:
 			game.player.y > scrH - game.player.height - game.player.vel
 		]
 
-		return state
+		return [int(x) for x in  state]
 
 	def remember(self, state, action, reward, next_state, game_over):
 		self.memory.append((state, action, reward, next_state, game_over))
@@ -91,7 +86,7 @@ class Agent:
 			# print(final_move)
 
 		else:
-			# print(state)
+			print(state)
 			state0 =  torch.tensor(state, dtype=torch.float)
 			prediction = self.model(state0)
 			move = torch.argmax(prediction).item()
