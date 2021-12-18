@@ -7,7 +7,7 @@ from model import Linear_QNet, QTrainer
 from dogAI import DogGameAI
 from helper import plot
 
-max_memory = 1_000_000
+max_memory = 100_000
 batch_size = 1000
 learning_rate = 0.0001
 
@@ -18,15 +18,33 @@ class Agent:
 		self.epsilon = 0 # aleatoriedade
 		self.gamma = 0.95 # taxa de desconto
 		self.memory = deque(maxlen = max_memory) # se alcança o limite: popleft()
-		self.model = Linear_QNet(8, 400, 4)
+		self.model = Linear_QNet(18, 128, 8)
 		self.trainer = QTrainer(self.model, lr=learning_rate, gamma=self.gamma)
+
+	def _binning(x):
+		return np.floor(x/20)
+
+
 
 	def get_state(self, game):
 		state = [
-			game.player.x, game.player.y, # game.player.mana, # Player
-			game.player.x - game.biscoito.x, game.player.y - game.biscoito.y, # Biscoito
-			game.player.x - game.monster_1.x,  game.player.y - game.monster_1.y,
-			game.player.x - game.monster_2.x, game.player.y - game.monster_2.y # Mobs
+			np.floor(game.player.x), np.floor(game.player.y), # game.player.mana, # Player
+			np.floor(game.player.x - game.biscoito.x), np.floor(game.player.y - game.biscoito.y), # Biscoito
+			np.floor(game.player.x - game.monster_1.x),  np.floor(game.player.y - game.monster_1.y),
+			np.floor(game.player.x - game.monster_2.x), np.floor(game.player.y - game.monster_2.y),  # Mobs
+
+			game.monster_1.x - 40 <= game.player.x <= game.monster_1.x + 40,
+			game.monster_1.y - 40 <= game.player.y <= game.monster_1.y + 40,
+			game.monster_2.x - 40 <= game.player.x <= game.monster_2.x + 40,
+			game.monster_2.y - 40 <= game.player.y <= game.monster_2.y + 40,
+
+			game.biscoito.x * 40 - 64 <= game.player.x <= game.biscoito.x * 40 + 48,
+			game.biscoito.y * 40 - 64 <= game.player.y <= game.biscoito.y * 40 + 32,
+
+			game.player.x < game.player.vel,
+			game.player.x > scrW - game.player.width - game.player.vel,
+			game.player.y < game.player.vel,
+			game.player.y > scrH - game.player.height - game.player.vel
 		]
 
 		return state
@@ -50,12 +68,26 @@ class Agent:
 	def get_action(self, state):
 		# random moves: tradeoff exploration / exploitation
 		# self.epsilon = 620 - 100*np.log(self.n_games)
-		self.epsilon = 0
+		self.epsilon = 100 - self.n_games
 		final_move = [0, 0, 0, 0]
-		if random.randint(0, 4000) < self.epsilon:
+		if random.randint(0, 160) < self.epsilon:
 			# final_move = bernoulli.rvs(size = 5, p = 0.5)
-			move = random.randint(0,3)
-			final_move[move] = 1
+			move = random.randint(0,7)
+			if move == 4:
+				final_move = [1, 0, 1, 0]
+
+			elif move == 5:
+				final_move = [1, 0, 0, 1]
+
+			elif move == 6:
+				final_move = [0, 1, 1, 0]
+
+			elif move == 7:
+				final_move = [0, 1, 0, 1]
+
+			else:
+				final_move[move] = 1
+
 			# print(final_move)
 
 		else:
@@ -63,12 +95,21 @@ class Agent:
 			state0 =  torch.tensor(state, dtype=torch.float)
 			prediction = self.model(state0)
 			move = torch.argmax(prediction).item()
-			final_move[move] = 1
 
-			print(prediction)
-			# print(final_move)
+			if move == 4:
+				final_move = [1, 0, 1, 0]
 
-		# print(type(final_move))
+			elif move == 5:
+				final_move = [1, 0, 0, 1]
+
+			elif move == 6:
+				final_move = [0, 1, 1, 0]
+
+			elif move == 7:
+				final_move = [0, 1, 0, 1]
+
+			else:
+				final_move[move] = 1
 
 		return final_move
 

@@ -224,7 +224,7 @@ class DogGame():
 			self.win.blit(monster_right[self.monster_1.walkCount // 4], (self.monster_1.x, self.monster_1.y))
 			self.monster_1.walkCount += 1
 		elif self.monster_1.up:
-			self.win.blit(deathspiritUp[self.monster_1.walkCount // 8], (self.monster_1.x, self.monster_1.y))
+			self.win.blit(monster_up[self.monster_1.walkCount // 8], (self.monster_1.x, self.monster_1.y))
 			self.monster_1.walkCount += 1
 		else:
 			self.win.blit(monster_down[self.monster_1.walkCount // 8], (self.monster_1.x, self.monster_1.y))

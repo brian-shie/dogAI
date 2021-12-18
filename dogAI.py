@@ -12,7 +12,7 @@ class Player:
 		self.y = y
 		self.width = int(width)
 		self.height = int(height)
-		self.vel = 5
+		self.vel = 10
 		self.left, self.right, self.up, self.down = False, False, False, False
 		self.walkCount = 0
 		self.mana = 150
@@ -87,10 +87,10 @@ class DogGameAI():
 		self._move_monsters()
 
 		# 3. Check if game ends
-		reward = 0.001
+		reward = 0
 		if self.monster_1.x - 40 <= self.player.x <= self.monster_1.x + 40 and self.monster_1.y - 40 <= self.player.y <= self.monster_1.y + 40:
 			self.game_over = True
-			reward = -1000
+			reward = -10
 			return reward, self.game_over, self.score
 
 		if self.monster_2.x - 40 <= self.player.x <= self.monster_2.x + 40 and self.monster_2.y - 40 <= self.player.y <= self.monster_2.y + 40:
@@ -107,7 +107,7 @@ class DogGameAI():
 			self.score += 1
 			self.monster_1.vel += 0.1
 			self.monster_2.vel += 0.1
-			reward = 200
+			reward = 10
 
 		# 5. Redraw
 		self._redraw()
