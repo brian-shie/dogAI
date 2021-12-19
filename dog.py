@@ -310,8 +310,8 @@ if __name__ == '__main__':
 		game.game_over, score = game.play_step()
 
 		if game.game_over == True:
-			time.sleep(3)
+			time.sleep(2)
 			break
 
-		print('Final Score', score)
-		pygame.quit()
+	print('Final Score', score)
+	pygame.quit()
